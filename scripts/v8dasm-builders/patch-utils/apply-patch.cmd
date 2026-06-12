@@ -74,12 +74,31 @@ echo [第0级] 重置 V8 仓库到干净状态...
 echo [第0级] 重置 V8 仓库到干净状态... >> "%LOG_FILE%"
 cd /d "%V8_DIR%"
 
+REM 首先验证 git 仓库是否正常
+git rev-parse --is-inside-work-tree >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] 检测到 V8 仓库损坏，无法执行 git 操作
+    echo [ERROR] 检测到 V8 仓库损坏，无法执行 git 操作 >> "%LOG_FILE%"
+    if "%ABORT_ON_FAILURE%"=="true" (
+        exit /b 255
+    ) else (
+        goto :all_failed
+    )
+)
+
 REM 检查是否有未提交的更改
 git diff --quiet >nul 2>&1
 if errorlevel 1 (
     echo [RESET] 检测到未提交的更改，正在重置...
     echo [RESET] 检测到未提交的更改，正在重置... >> "%LOG_FILE%"
     git reset --hard HEAD >> "%LOG_FILE%" 2>&1
+    if errorlevel 1 (
+        echo [ERROR] git reset 失败，仓库可能已损坏
+        echo [ERROR] git reset 失败，仓库可能已损坏 >> "%LOG_FILE%"
+        if "%ABORT_ON_FAILURE%"=="true" (
+            exit /b 255
+        )
+    )
     git clean -fd >> "%LOG_FILE%" 2>&1
     echo [RESET] ✅ 仓库已重置到干净状态
     echo [RESET] ✅ 仓库已重置到干净状态 >> "%LOG_FILE%"

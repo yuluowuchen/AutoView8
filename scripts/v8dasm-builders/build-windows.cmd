@@ -49,6 +49,22 @@ if not exist v8 mkdir v8
 cd v8
 
 REM 获取 V8 源码
+set REFETCH_V8=false
+if exist v8 (
+    echo [检查] 验证已缓存的 V8 仓库完整性...
+    cd v8
+    git rev-parse --is-inside-work-tree >nul 2>&1
+    if errorlevel 1 (
+        echo [警告] V8 仓库已损坏，需要重新下载
+        cd ..
+        rmdir /s /q v8
+        set REFETCH_V8=true
+    ) else (
+        echo [检查] V8 仓库验证通过
+        cd ..
+    )
+)
+
 if not exist v8 (
     echo =====[ Fetching V8 ]=====
     call fetch v8
