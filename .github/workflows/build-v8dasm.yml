@@ -52,7 +52,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Python dependencies
-        run: pip3 install setuptools
+        run: pip3 install setuptools wheel packaging
 
       - name: Cache Depot Tools
         uses: actions/cache@v4
@@ -72,6 +72,18 @@ jobs:
         run: |
           chmod +x scripts/v8dasm-builders/build-macos-arm.sh
           scripts/v8dasm-builders/build-macos-arm.sh ${{ matrix.version.v8 }} "${{ matrix.version.args }}"
+
+      - name: Show build logs on failure
+        if: failure()
+        run: |
+          echo "===== Patch State Log ====="
+          if [ -f ~/work/AutoView8/AutoView8/scripts/v8dasm-builders/patch-utils/patch-state.log ]; then
+            cat ~/work/AutoView8/AutoView8/scripts/v8dasm-builders/patch-utils/patch-state.log
+          fi
+          echo "===== Build Output Logs ====="
+          if [ -d ~/v8/v8/out.gn ]; then
+            find ~/v8/v8/out.gn -name "*.log" -type f | head -10 | xargs cat
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -113,6 +125,24 @@ jobs:
         shell: cmd
         run: |
           call scripts\v8dasm-builders\build-windows.cmd ${{ matrix.version.v8 }} "${{ matrix.version.args }}"
+
+      - name: Show build logs on failure
+        if: failure()
+        shell: cmd
+        run: |
+          echo ===== Patch State Log =====
+          if exist "D:\a\AutoView8\AutoView8\scripts\v8dasm-builders\patch-utils\patch-state.log" (
+            type "D:\a\AutoView8\AutoView8\scripts\v8dasm-builders\patch-utils\patch-state.log"
+          ) else (
+            echo Patch log not found
+          )
+          echo ===== Build Output Logs =====
+          if exist "v8\v8\out.gn" (
+            for /r "v8\v8\out.gn" %%f in (*.log) do (
+              echo "%%f"
+              type "%%f"
+            )
+          )
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
