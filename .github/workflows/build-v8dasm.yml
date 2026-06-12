@@ -36,61 +36,61 @@ jobs:
             echo "matrix={\"version\":$VERSIONS}" >> $GITHUB_OUTPUT
           fi
 
-  build-macos-arm:
-    name: macOS ARM64 - V8 ${{ matrix.version.v8 }}
-    runs-on: macos-14
-    needs: prepare
-    strategy:
-      matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v4
+  # build-macos-arm:
+  #   name: macOS ARM64 - V8 ${{ matrix.version.v8 }}
+  #   runs-on: macos-14
+  #   needs: prepare
+  #   strategy:
+  #     matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
+  #     fail-fast: false
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+  #     - name: Set up Python 3.12
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: '3.12'
 
-      - name: Install Python dependencies
-        run: pip3 install setuptools wheel packaging
+  #     - name: Install Python dependencies
+  #       run: pip3 install setuptools wheel packaging
 
-      - name: Cache Depot Tools
-        uses: actions/cache@v4
-        with:
-          path: ~/depot_tools
-          key: depot-tools-macos-arm-${{ runner.os }}
+  #     - name: Cache Depot Tools
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/depot_tools
+  #         key: depot-tools-macos-arm-${{ runner.os }}
 
-      - name: Cache V8 Source
-        uses: actions/cache@v4
-        with:
-          path: ~/v8
-          key: v8-source-${{ matrix.version.v8 }}-macos-arm
-          restore-keys: |
-            v8-source-${{ matrix.version.v8 }}-macos-
+  #     - name: Cache V8 Source
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/v8
+  #         key: v8-source-${{ matrix.version.v8 }}-macos-arm
+  #         restore-keys: |
+  #           v8-source-${{ matrix.version.v8 }}-macos-
 
-      - name: Build v8dasm
-        run: |
-          chmod +x scripts/v8dasm-builders/build-macos-arm.sh
-          scripts/v8dasm-builders/build-macos-arm.sh ${{ matrix.version.v8 }} "${{ matrix.version.args }}"
+  #     - name: Build v8dasm
+  #       run: |
+  #         chmod +x scripts/v8dasm-builders/build-macos-arm.sh
+  #         scripts/v8dasm-builders/build-macos-arm.sh ${{ matrix.version.v8 }} "${{ matrix.version.args }}"
 
-      - name: Show build logs on failure
-        if: failure()
-        run: |
-          echo "===== Patch State Log ====="
-          if [ -f ~/work/AutoView8/AutoView8/scripts/v8dasm-builders/patch-utils/patch-state.log ]; then
-            cat ~/work/AutoView8/AutoView8/scripts/v8dasm-builders/patch-utils/patch-state.log
-          fi
-          echo "===== Build Output Logs ====="
-          if [ -d ~/v8/v8/out.gn ]; then
-            find ~/v8/v8/out.gn -name "*.log" -type f | head -10 | xargs cat
-          fi
+  #     - name: Show build logs on failure
+  #       if: failure()
+  #       run: |
+  #         echo "===== Patch State Log ====="
+  #         if [ -f ~/work/AutoView8/AutoView8/scripts/v8dasm-builders/patch-utils/patch-state.log ]; then
+  #           cat ~/work/AutoView8/AutoView8/scripts/v8dasm-builders/patch-utils/patch-state.log
+  #         fi
+  #         echo "===== Build Output Logs ====="
+  #         if [ -d ~/v8/v8/out.gn ]; then
+  #           find ~/v8/v8/out.gn -name "*.log" -type f | head -10 | xargs cat
+  #         fi
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: v8dasm-macos-arm64-v${{ matrix.version.v8 }}
-          path: ~/v8/v8/v8dasm-${{ matrix.version.v8 }}
-          retention-days: 30
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: v8dasm-macos-arm64-v${{ matrix.version.v8 }}
+  #         path: ~/v8/v8/v8dasm-${{ matrix.version.v8 }}
+  #         retention-days: 30
 
   build-windows:
     name: Windows x64 - V8 ${{ matrix.version.v8 }}
@@ -154,7 +154,7 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [build-macos-arm, build-windows]
+    needs: [build-windows]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
