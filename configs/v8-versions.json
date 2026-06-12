@@ -1,7 +1,7 @@
 {
   "versions": [
     {
-      "v8_version": "10.8.168.25",
+      "v8_version": "10.8.168",
       "node_version": "v19.x",
       "build_args": "v8_enable_pointer_compression=false"
     }
