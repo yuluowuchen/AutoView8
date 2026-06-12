@@ -80,6 +80,8 @@ if errorlevel 1 (
     echo [ERROR] 检测到 V8 仓库损坏，无法执行 git 操作
     echo [ERROR] 检测到 V8 仓库损坏，无法执行 git 操作 >> "%LOG_FILE%"
     if "%ABORT_ON_FAILURE%"=="true" (
+        echo "===== 完整错误日志 ====="
+        type "%LOG_FILE%"
         exit /b 255
     ) else (
         goto :all_failed
@@ -91,15 +93,17 @@ git diff --quiet >nul 2>&1
 if errorlevel 1 (
     echo [RESET] 检测到未提交的更改，正在重置...
     echo [RESET] 检测到未提交的更改，正在重置... >> "%LOG_FILE%"
-    git reset --hard HEAD >> "%LOG_FILE%" 2>&1
+    git reset --hard HEAD 2>&1 | tee -a "%LOG_FILE%"
     if errorlevel 1 (
         echo [ERROR] git reset 失败，仓库可能已损坏
         echo [ERROR] git reset 失败，仓库可能已损坏 >> "%LOG_FILE%"
         if "%ABORT_ON_FAILURE%"=="true" (
+            echo "===== 完整错误日志 ====="
+            type "%LOG_FILE%"
             exit /b 255
         )
     )
-    git clean -fd >> "%LOG_FILE%" 2>&1
+    git clean -fd 2>&1 | tee -a "%LOG_FILE%"
     echo [RESET] ✅ 仓库已重置到干净状态
     echo [RESET] ✅ 仓库已重置到干净状态 >> "%LOG_FILE%"
 ) else (

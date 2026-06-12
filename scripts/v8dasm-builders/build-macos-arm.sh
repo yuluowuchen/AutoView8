@@ -41,6 +41,12 @@ if [ ! -d "depot_tools" ]; then
     git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
 fi
 export PATH=$(pwd)/depot_tools:$PATH
+
+# 为 Depot Tools 内置 Python 安装依赖
+echo "=====[ Installing Python dependencies for Depot Tools ]====="
+python3 -m ensurepip
+python3 -m pip install setuptools wheel packaging
+
 gclient
 
 # 创建工作目录
