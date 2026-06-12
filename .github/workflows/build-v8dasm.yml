@@ -189,3 +189,13 @@ jobs:
           files: release/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Show patch-state.log on failure
+        if: always()
+        shell: cmd
+        run: |
+          if exist "D:\a\AutoView8\AutoView8\scripts\v8dasm-builders\patch-utils\patch-state.log" (
+            type "D:\a\AutoView8\AutoView8\scripts\v8dasm-builders\patch-utils\patch-state.log"
+          ) else (
+            echo File not found
+          )
